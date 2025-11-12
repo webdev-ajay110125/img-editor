@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Responsive Image Editor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/b16c806e10.js" crossorigin="anonymous"></script>
+    <style>
+        label {
+            cursor: pointer;
+        }
+
+        #text {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-size: 2.5rem;
+            text-align: center;
+            width: fit-content;
+            max-width: 90%;
+            pointer-events: none;
+        }
+
+        input[type="range"]:disabled {
+            opacity: 0.5;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+        }
+
+        .editor-card {
+            position: relative;
+        }
+
+        .controls-card {
+            margin-top: 20px;
+        }
+
+        /* For small screens, make sliders stack under image */
+        @media (max-width: 992px) {
+            .sidebar-controls {
+                margin-top: 20px;
+            }
+        }
+
+        body {
+    padding-top: 10px; /* Adjust based on navbar height */
+    background-color: ;
+}
+
+img{
+pointer-events: none;  /* For Safari */
+}
+
+    </style>
+</head>
+
+<body class="mt-5" data-bs-theme="white m-5">
+    <nav class="navbar bg-dark fixed-top mb-5">
+        <h2 class="text-white mx-4">Image Editor</h2>
+    </nav>
+
+    <div class="container">
+        <h1 class="text-center text-black my-4">Image Editor</h1>
+        <div class="row">
+            <!-- Image Column -->
+            <div class="col-lg-8 text-center">
+                <div class="card m-auto w-100 shadow rounded-5 editor-card position-relative">
+                    <label for="input-file" class="text-center">
+                        <img src="upload.png" alt="" class="w-75 p-2" id="profile-pic" name="poster" accept="image/png, image/jpeg,image/jpg">
+                        <div class="d-none text" id="text"></div>
+                        <h4 class="text-center my-2" id="upload-text">CLICK HERE TO UPLOAD IMAGE</h4>
+                    </label>
+                    <input type="file" class="d-none form-control" id="input-file">
+                </div>
+
+                <!-- Download & Reset Buttons -->
+                <div class="controls-card text-center mt-3">
+                    <button class="btn btn-success mb-2" id="download" disabled>
+                        <i class="fa-solid fa-download"></i> Download Image
+                    </button>
+                    <button class="btn btn-warning" id="reset" disabled>
+                        <i class="fa-solid fa-rotate"></i> Reset All
+                    </button>
+                </div>
+            </div>
+
+            <!-- Controls Column -->
+            <div class="col-lg-4 sidebar-controls">
+                <!-- Text Controls -->
+                <div class="card p-3 mb-3 shadow">
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="input" placeholder="Enter text">
+                        <button class="btn btn-primary" id="btn">Add Text</button>
+                    </div>
+                    <label for="text-size" class="form-label">Text Size</label>
+                    <input type="range" class="form-range mb-2" min="10" max="100" value="25" id="text-size">
+
+                    <label for="text-color" class="form-label">Text Color</label>
+                    <input type="color" class="form-control form-control-color" id="text-color" value="#0000ff"
+                        title="Choose text color">
+                </div>
+
+                <!-- Image Filters -->
+                <div class="card p-3 mb-3 shadow">
+                    <label for="brightness" class="form-label">Brightness</label>
+                    <input type="range" class="form-range mb-2" min="0" max="200" value="100" id="brightness">
+
+                    <label for="contrast" class="form-label">Contrast</label>
+                    <input type="range" class="form-range mb-2" min="0" max="200" value="100" id="contrast">
+
+                    <label for="invert" class="form-label">Invert</label>
+                    <input type="range" class="form-range mb-2" min="0" max="100" value="0" id="invert">
+
+                    <label for="hue" class="form-label">Hue Rotate</label>
+                    <input type="range" class="form-range mb-2" min="0" max="360" value="0" id="hue">
+
+                    <label for="saturation" class="form-label">Saturation</label>
+                    <input type="range" class="form-range mb-2" min="0" max="300" value="100" id="saturation">
+
+                    <label for="blur" class="form-label">Blur</label>
+                    <input type="range" class="form-range" min="0" max="10" value="0" id="blur">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const profilePic = document.getElementById('profile-pic');
+        const inputFile = document.getElementById('input-file');
+        const input = document.getElementById('input');
+        const btn = document.getElementById('btn');
+        const text = document.getElementById('text');
+        const uploadText = document.getElementById('upload-text');
+        const textSize = document.getElementById('text-size');
+        const textColor = document.getElementById('text-color');
+        const downloadBtn = document.getElementById('download');
+        const resetBtn = document.getElementById('reset');
+
+        const brightness = document.getElementById('brightness');
+        const contrast = document.getElementById('contrast');
+        const invert = document.getElementById('invert');
+        const hue = document.getElementById('hue');
+        const saturation = document.getElementById('saturation');
+        const blur = document.getElementById('blur');
+
+        const sliders = [brightness, contrast, invert, hue, saturation, blur];
+
+        function setDisabledState(isDisabled) {
+            sliders.forEach(slider => slider.disabled = isDisabled);
+            btn.disabled = isDisabled;
+            textSize.disabled = isDisabled;
+            textColor.disabled = isDisabled;
+            downloadBtn.disabled = isDisabled;
+            resetBtn.disabled = isDisabled;
+        }
+
+        setDisabledState(true);
+
+        btn.addEventListener('click', () => {
+            const inputValue = input.value.trim();
+            if (inputValue) text.innerHTML = inputValue;
+        });
+
+        textSize.addEventListener('input', () => {
+            text.style.fontSize = textSize.value + 'px';
+        });
+
+        textColor.addEventListener('input', () => {
+            text.style.color = textColor.value;
+        });
+
+        inputFile.onchange = function () {
+            if (inputFile.files && inputFile.files[0]) {
+                profilePic.src = URL.createObjectURL(inputFile.files[0]);
+                uploadText.style.display = 'none';
+                text.classList.remove('d-none');
+                setDisabledState(false);
+            }
+        };
+
+        sliders.forEach(slider => slider.addEventListener('input', applyFilters));
+
+        function applyFilters() {
+            profilePic.style.filter = `
+                brightness(${brightness.value}%)
+                contrast(${contrast.value}%)
+                invert(${invert.value}%)
+                hue-rotate(${hue.value}deg)
+                saturate(${saturation.value}%)
+                blur(${blur.value}px)
+            `;
+        }
+
+        downloadBtn.addEventListener('click', () => {
+            const canvas = document.createElement('canvas');
+            const imgWidth = profilePic.naturalWidth;
+            const imgHeight = profilePic.naturalHeight;
+            canvas.width = imgWidth;
+            canvas.height = imgHeight;
+            const ctx = canvas.getContext('2d');
+
+            ctx.filter = profilePic.style.filter;
+            ctx.drawImage(profilePic, 0, 0, imgWidth, imgHeight);
+
+            if (text.innerHTML) {
+                ctx.font = `${textSize.value}px sans-serif`;
+                ctx.fillStyle = textColor.value;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText(text.innerHTML, imgWidth / 2, imgHeight - 20);
+            }
+
+            const link = document.createElement('a');
+            link.download = 'edited-image.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+
+        resetBtn.addEventListener('click', () => {
+            text.innerHTML = '';
+            text.classList.add('d-none');
+            brightness.value = 100;
+            contrast.value = 100;
+            invert.value = 0;
+            hue.value = 0;
+            saturation.value = 100;
+            blur.value = 0;
+            applyFilters();
+            input.value = '';
+            textSize.value = 25;
+            textColor.value = '#ffffff';
+            text.style.fontSize = textSize.value + 'px';
+            text.style.color = textColor.value;
+            setDisabledState(true);
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
